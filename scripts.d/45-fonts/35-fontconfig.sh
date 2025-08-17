@@ -8,6 +8,9 @@ ffbuild_enabled() {
 }
 
 ffbuild_dockerbuild() {
+    # The version-detection here fails for Debian-Versions of libtoolize, so it needs a bit of help
+    sed -i -e 's/libtool_version=.*/libtool_version=2.5/g' ./autogen.sh
+
     ./autogen.sh --noconf
 
     local myconf=(
@@ -36,7 +39,9 @@ ffbuild_dockerbuild() {
 
     ./configure "${myconf[@]}"
     make -j$(nproc)
-    make install
+    make install DESTDIR="$FFBUILD_DESTDIR"
+
+    rm -rf "$FFBUILD_DESTDIR"/{var,etc}
 }
 
 ffbuild_configure() {
